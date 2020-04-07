@@ -1,5 +1,5 @@
 {
-  "name": "vue",
+  "name": "namegator-client",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -8,6 +8,7 @@
     "lint": "vue-cli-service lint "
   },
   "dependencies": {
+    "axios": "^0.19.2",
     "bootstrap": "^4.4.1",
     "core-js": "^3.6.4",
     "font-awesome": "^4.7.0",
@@ -34,9 +35,15 @@
     "parserOptions": {
       "parser": "babel-eslint"
     },
-    "rules": {     
-      "indent":["error", "tab"],
-      "semi":["error", "always"]
+    "rules": {
+      "indent": [
+        "error",
+        "tab"
+      ],
+      "semi": [
+        "error",
+        "always"
+      ]
     }
   },
   "browserslist": [
