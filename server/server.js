@@ -10,6 +10,16 @@ const typeDefs = `
 	type Query {
 		items (type: String):[Item]
 	}
+	
+	input ItemInput {
+		type: String
+		description: String
+	}
+
+	type Mutation {
+		saveItem (item: ItemInput): Item
+		deleteItem (id: Int): Boolean
+	}
 
 `;
 
@@ -19,14 +29,29 @@ const items = [
 	{ id: 3, type: 'prefix', description:'Flight'},
 	{ id: 4, type: 'sufix', description:'Hub'},
 	{ id: 5, type: 'sufix', description:'Station'},
-	{ id: 6, type: 'sufix', description:'Mart'}
+	{ id: 6, type: 'sufix', description:'Mart'},
 ];
 
 const resolvers = {
 	Query: {
-		items(_, args ) {
-			console.log(args)
+		items(_, args ) {		
 			return items.filter(item => item.type === args.type);
+		}
+	}, 
+	Mutation: {
+		saveItem(_, args) {		
+			const item = args.item;
+			item.id = Math.floor(Math.random()*1000);
+			items.push(item);			
+			return item;
+		},
+		deleteItem(_, args) {
+			const id = args.id;
+			console.log(args)
+			const item = items.find(item => item.id === id);			
+			if(!item) return false;			
+			items.splice(items.indexOf(item),1)
+			return true;
 		}
 	}
 }

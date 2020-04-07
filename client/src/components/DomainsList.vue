@@ -2,10 +2,10 @@
   <div class="container">
     <div class="row">
       <div class="col-md">
-        <app-item-list title="Prefixos" v-bind:items="prefixes" v-on:addItem="addPrefix" v-on:deleteItem="deletePrefix"/>            
+        <app-item-list title="Prefixos" type="prefix" v-bind:items="items.prefix" v-on:addItem="addItem" v-on:deleteItem="deleteItem"/>            
       </div>
       <div class="col-md">
-        <app-item-list title="Sufixos" v-bind:items="sufixes" v-on:addItem="addSufix" v-on:deleteItem="deleteSufix"/>            
+        <app-item-list title="Sufixos" type="sufix" v-bind:items="items.sufix" v-on:addItem="addItem" v-on:deleteItem="deleteItem"/>            
       </div>
     </div>
     <br/>
@@ -40,31 +40,88 @@ export default {
 		'app-item-list': AppItemList
 	},
 	data: function () {
-		return {		
-			prefixes: [],
-			sufixes: []
+		return {
+			items: {		
+				prefix: [],
+				sufix: []
+			}
 		};
 	}, 
 	methods:{
-		addPrefix(prefix) {
-			this.prefixes.push(prefix);
-		},
-		addSufix(sufix) {
-			this.sufixes.push(sufix);
-		},
-		deletePrefix(prefix){
-			this.prefixes.splice(this.prefixes.indexOf(prefix),1);
+		addItem(item) {
+			axios ({
+				url: 'http://localhost:4000',
+				method: "post",
+				data: {
+					query:`
+							mutation ($item: ItemInput) {
+								newItem: saveItem(item: $item) {
+									id
+									type
+									description
+								}
+							}
+						`,
+					variables: {
+						item
+					}
+				}
+			}).then(response => {
+				const query = response.data;
+				const newItem = query.data.newItem;			
+				this.items[item.type].push(newItem);
+			});
 		}, 
-		deleteSufix(sufix){
-			this.sufixes.splice(this.prefixes.indexOf(sufix),1);
-		}	
+		deleteItem(item){			
+			axios ({
+				url: 'http://localhost:4000',
+				method: "post",
+				data: {
+					query:`
+							mutation ($id:Int){
+								deleted: deleteItem (id: $id)								
+							}
+						`,
+					variables: {							
+						id: item.id
+					}
+				}
+			}).then(response=> {
+				const retorno = response.data;				
+				if (retorno.data.deleted)
+					this.getItems(item.type);
+			});
+		},
+		getItems(type){
+			axios ({
+				url: 'http://localhost:4000',
+				method: "post",
+				data: {
+					query:`
+					query ($type: String)
+					{
+						items: items (type: $type) {
+								id
+								type
+								description
+						}
+					}`,
+					variables: {
+						type
+					}
+				}
+			}).then(response =>{
+				const query = response.data;
+				this.items[type] = query.data.items;
+			});
+		}		
 	}, 
 	computed:{
 		domains() {
 			const domains = [];
-			for (const prefix of this.prefixes) {
-				for (const sufix of this.sufixes) {
-					const name = prefix + sufix;
+			for (const prefix of this.items.prefix) {
+				for (const sufix of this.items.sufix) {
+					const name = prefix.description + sufix.description;
 					const url = name.toLowerCase();
 					const checkout=`https://checkout.hostgator.com.br/?a=add&sld=${url}&tld=.com.br`;
 					domains.push({name, checkout});
@@ -74,29 +131,8 @@ export default {
 		}
 	},
 	created() {
-		axios ({
-			url: 'http://localhost:4000',
-			method: "post",
-			data: {
-				query:`
-				{
-					prefixes: items (type: "prefix") {
-							id
-							type
-							description
-					}
-					sufixes: items (type: "sufix") {
-						id
-						type
-						description
-					}
-				}`
-			}
-		}).then(response =>{
-			const query = response.data;
-			this.prefixes = query.data.prefixes.map(prefix => prefix.description);
-			this.sufixes = query.data.sufixes.map(sufix => sufix.description);		
-		});
+		this.getItems('prefix');
+		this.getItems('sufix');
 	}
 };
 </script>
