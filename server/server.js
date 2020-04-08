@@ -57,7 +57,8 @@ const isDomainAvailable = function (url) {
 
 const resolvers = {
 	Query: {
-		items(_, args ) {		
+		items(_, args ) {
+			console.log('getItems', args.type);
 			return items.filter(item => item.type === args.type);
 		}
 	}, 
@@ -83,6 +84,7 @@ const resolvers = {
 			return domains;
 		},
 		async generateDomains() {
+			console.log('generateDomains');
 			const domains = [];
 			const extension = '.com.br';		
 			for (const prefix of items.filter(item => item.type === 'prefix')) {
