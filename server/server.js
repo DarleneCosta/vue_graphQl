@@ -10,6 +10,7 @@ const typeDefs = `
 	
 	type Domain {
 		name: String
+		extension: String
 		checkout: String 
 		available: Boolean
 	}
@@ -26,7 +27,8 @@ const typeDefs = `
 	type Mutation {
 		saveItem (item: ItemInput): Item
 		deleteItem (id: Int): Boolean
-		generateDomains: [Domain]
+		generateDomain (name:String): [Domain]
+		generateDomains: [Domain]		
 	}
 
 `;
@@ -68,15 +70,28 @@ const resolvers = {
 			items.splice(items.indexOf(item),1)
 			return true;
 		},
+		async generateDomain(_, args){
+			const domains = [];
+			const name = args.name;
+			const extensions = ['.com.br', '.com', '.net', '.org'];			
+			for (const extension of extensions) {				
+				const url = name.toLowerCase();
+				const checkout=`https://checkout.hostgator.com.br/?a=add&sld=${url}&tld=${extension}`;
+				const available = await isDomainAvailable(`${url}${extension}`);
+				domains.push({name, extension, checkout, available});								
+			}			
+			return domains;
+		},
 		async generateDomains() {
 			const domains = [];
+			const extension = '.com.br';		
 			for (const prefix of items.filter(item => item.type === 'prefix')) {
 				for (const sufix of items.filter(item => item.type === 'sufix')) {
 					const name = prefix.description + sufix.description;
 					const url = name.toLowerCase();
-					const checkout=`https://checkout.hostgator.com.br/?a=add&sld=${url}&tld=.com.br`;
-					const available = await isDomainAvailable(`${url}.com.br`);
-					domains.push({name, checkout, available});
+					const checkout=`https://checkout.hostgator.com.br/?a=add&sld=${url}&tld=${extension}`;;
+					const available = await isDomainAvailable(`${url}${extension}`);
+					domains.push({name, extension, checkout, available});
 				}
 			}
 			return domains;

@@ -25,6 +25,10 @@
                 <a class="btn btn-info" v-bind:href="domain.checkout" target="_blank">
                   <span class="fa fa-shopping-cart"></span>
                 </a>
+								&nbsp;
+								<button class="btn btn-info" @click="openDomain(domain)">
+									<span class="fa fa-search"></span>
+								</button>
               </div>
             </div>
           </li>
@@ -42,7 +46,7 @@ export default {
 	components: {
 		'app-item-list': AppItemList
 	},
-	data: function () {
+	data () {
 		return {
 			items: {		
 				prefix: [],
@@ -141,7 +145,12 @@ export default {
 				const query = response.data;
 				this.domains = query.data.domains;
 			});
-		}		
+		},
+		openDomain(domain) {
+			this.$router.push({
+				path:`/domain/${domain.name}`
+			});
+		}
 	},
 	created() {
 		Promise.all([

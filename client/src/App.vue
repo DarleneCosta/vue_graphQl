@@ -5,8 +5,8 @@
       <br/>
       <h6 class="text-secondary">Gerador de nomes utilizando Vue.js, GraphQl e Node</h6>
     </div>
-    <div id="main">   
-      <domains-list />
+    <div id="main"> 
+      <router-view></router-view>  
     </div>
   </div>
 </template>
@@ -14,12 +14,8 @@
 <script>
 import "bootstrap/dist/css/bootstrap.css";
 import "font-awesome/css/font-awesome.css";
-import DomainsList from "./components/DomainsList";
 export default {
-	name: 'App',
-	components: {
-		'domains-list': DomainsList
-	}
+	name: 'app'
 };
 </script>
 
